@@ -6,5 +6,6 @@ venv/
 .env
 .env.*
 results/
-# Internal / alternate evaluation stack (not published with the public repo)
+*.csv
+
 eval_framework/

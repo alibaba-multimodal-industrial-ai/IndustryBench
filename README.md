@@ -6,26 +6,29 @@ Multi-lingual industrial QA benchmark (2,049 items, zh / en / ru / vi).
 
 ## Dataset
 
-```python
-from datasets import load_dataset
-load_dataset("danielbai1703/IndustryBench")
+```bash
+pip install datasets
 ```
 
-## Evaluation (optional)
+```python
+from datasets import load_dataset
+ds = load_dataset("danielbai1703/IndustryBench", split="train")
+ds.to_csv("industrybench.csv")  # for local evaluation
+```
+
+## Evaluation
 
 ```bash
 pip install -r requirements.txt
-```
-
-Export a CSV from the dataset (or point `--data-path` at your file), then:
-
-```bash
-python evaluate.py --language zh --api-base https://api.openai.com/v1 --api-key "$OPENAI_API_KEY" --model <model_id>
+python evaluate.py --data-path industrybench.csv --language zh \
+  --api-base https://api.openai.com/v1 --api-key "$OPENAI_API_KEY" --model <model_id>
 ```
 
 `python evaluate.py --help` for options.
 
 See `LICENSE` (MIT).
+
+## Citation
 
 ```bibtex
 @misc{bai2026industrybenchprobingindustrialknowledge,
@@ -38,4 +41,3 @@ See `LICENSE` (MIT).
   url={https://arxiv.org/abs/2605.10267},
 }
 ```
-
