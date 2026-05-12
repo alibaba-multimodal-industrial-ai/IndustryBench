@@ -104,19 +104,25 @@ def call_llm(
         return {"success": False, "content": None, "error": f"Request failed: {str(e)}", "usage": None, "model": model}
 
 
-JUDGE_PROMPT_TEMPLATE = """You are a professional evaluator for LLM responses. Score the model's answer against the ground truth.
+JUDGE_PROMPT_TEMPLATE = """你现在是一名评测大模型回复结果的专业评测人员，现在需要你来对大模型的回复结果进行打分，并给出理由。
 
-Scrubric (0-3 scale):
-- 3: Model answer is essentially consistent with the ground truth, with matching reasoning and logic.
-- 2: Model answer is largely correct but differs in reasoning or justification.
-- 1: Model answer is partially correct or has plausible reasoning but incorrect conclusion.
-- 0: Model answer is entirely incorrect.
+# 任务要求
+1、理解输入的问题与标准答案，判断大模型的答案与标准答案是否表述一致，对一致程度进行打分，并给出打分理由；
+2、打分标准：0-3分，
+   - 3分表示大模型答案与标准答案基本一致，且答案理由与判断逻辑与标准答案也基本一致，如果大模型答案中没有判断理由，只需要答案一致，就打3分；
+   - 2分表示大模型答案与标准答案基本一致，但答案理由与判断逻辑与标准答案不一样；
+   - 1分表示大模型答案只有部分正确，或者理由部分合理，但答案不正确；
+   - 0分表示大模型答案完全错误；
+3、打分理由：根据打分标准，需要输出你打分的理由。
 
-Output strict JSON with fields "score" (integer 0-3) and "reason" (string).
+# 格式要求
+输出为json格式，有2个字段：score和reason，
+具体格式为：{{"score":"x", "reason":"xxx"}}
 
-Question: {question}
-Ground truth: {ground_truth}
-Model answer: {model_response}"""
+现在轮到你开始进行评测：
+输入问题：{question}
+标准答案：{ground_truth}
+大模型答案：{model_response}"""
 
 
 class LLMJudge:
@@ -133,7 +139,7 @@ class LLMJudge:
             model_response=model_response,
         )
         messages = [
-            {"role": "system", "content": "You are a professional evaluator. Output only valid JSON."},
+            {"role": "system", "content": "你是一名专业评测人员。只输出合法 JSON，不要输出其他任何内容。"},
             {"role": "user", "content": judge_prompt},
         ]
         result = self.call_llm(
@@ -715,9 +721,7 @@ def main():
         required=True,
         help=(
             "OpenAI-compatible root URL ending in /v1 (script appends /chat/completions). "
-            "Examples: https://api.openai.com/v1 ; "
-            "China DashScope https://dashscope.aliyuncs.com/compatible-mode/v1 ; "
-            "Intl https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+            "Examples: https://api.openai.com/v1 ; https://dashscope.aliyuncs.com/compatible-mode/v1"
         ),
     )
     parser.add_argument(

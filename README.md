@@ -20,24 +20,21 @@ ds.to_csv("industrybench.csv")  # for local evaluation
 
 `--api-base` is the **OpenAI-compatible API root** (must end with `/v1`). The script calls `POST {api-base}/chat/completions`. It is **not** the model name; the model is `--model` (and optionally `--judge-model`).
 
-**Qwen / DashScope (e.g. `qwen3-max` as judge):** use the DashScope compatible endpoint and your DashScope `sk-` key. China region example:
+**DashScope / Qwen:** use the compatible-mode base URL from the [DashScope OpenAI compatibility](https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope) documentation, for example `https://dashscope.aliyuncs.com/compatible-mode/v1`, plus your DashScope `sk-` key.
 
 ```bash
 pip install -r requirements.txt
 export DASHSCOPE_API_KEY="sk-..."   # or use --api-key
 
-# Same model for answers and judge
 python evaluate.py --data-path industrybench.csv --language zh \
   --api-base https://dashscope.aliyuncs.com/compatible-mode/v1 \
   --model qwen3-max
 
-# Answering model A, judge + safety still qwen3-max
+# Optional: another model answers, qwen3-max judges (and safety review)
 python evaluate.py --data-path industrybench.csv --language zh \
   --api-base https://dashscope.aliyuncs.com/compatible-mode/v1 \
   --model <your_answer_model> --judge-model qwen3-max
 ```
-
-**Outside mainland China**, the host is often `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (see [DashScope OpenAI compatibility](https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope)).
 
 **OpenAI:**
 
