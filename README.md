@@ -38,7 +38,9 @@ ds = load_dataset("alibaba-multimodal-industrial-ai/IndustryBench", split="train
 print(ds[0].keys())
 ```
 
-Typical columns include `question` / `answer` (Chinese), `question_en` / `answer_en`, `question_ru` / `answer_ru`, `question_vi` / `answer_vi`, `knowledge_text`, `capability`, `difficulty`, `domain`, `industry_primary`, etc. Full schema is documented in the **paper appendix** and on the **HF dataset card**.
+The Hugging Face UI may show a small **metadata** table (language, license, task tags, etc.) if the dataset `README.md` on the Hub starts with a **`---` YAML block**. That block is optional; a YAML-free template lives in this repo at [`huggingface/README.md`](huggingface/README.md) for you to paste on the Hub if you want that table gone.
+
+Typical columns include `question` / `answer` (Chinese), `question_en` / `answer_en`, `question_ru` / `answer_ru`, `question_vi` / `answer_vi`, `knowledge_text`, `capability`, `difficulty`, `domain`, `industry_primary`, etc. Full schema is documented in the **paper appendix** and on the **HF dataset card** body (markdown below any YAML).
 
 ---
 
@@ -81,6 +83,7 @@ Typical columns include `question` / `answer` (Chinese), `question_en` / `answer
 |:---|:---|
 | `evaluate.py` | End-to-end multilingual runner: generation → LLM judge (0–3) → optional safety review → CSV. |
 | `requirements.txt` | Minimal Python deps for `evaluate.py`. |
+| `huggingface/README.md` | Suggested **Hub dataset card** (no YAML frontmatter); paste on HF to drop the auto metadata table. |
 | `LICENSE` | MIT |
 
 Large raw CSVs are **not** stored in git; the canonical release is **Hugging Face**.
