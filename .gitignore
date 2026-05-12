@@ -1,1 +1,10 @@
 .DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+results/
+# Internal / alternate evaluation stack (not published with the public repo)
+eval_framework/
