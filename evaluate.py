@@ -713,11 +713,26 @@ def main():
         "--api-base",
         type=str,
         required=True,
-        help="OpenAI-compatible API base URL (e.g. https://api.openai.com/v1)",
+        help=(
+            "OpenAI-compatible root URL ending in /v1 (script appends /chat/completions). "
+            "Examples: https://api.openai.com/v1 ; "
+            "China DashScope https://dashscope.aliyuncs.com/compatible-mode/v1 ; "
+            "Intl https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+        ),
     )
-    parser.add_argument("--api-key", type=str, default=None, help="API key (or set OPENAI_API_KEY env var)")
-    parser.add_argument("--model", type=str, required=True, help="Model name to evaluate")
-    parser.add_argument("--judge-model", type=str, default=None, help="Judge model for scoring (default: same as --model)")
+    parser.add_argument(
+        "--api-key",
+        type=str,
+        default=None,
+        help="API key, or env OPENAI_API_KEY / DASHSCOPE_API_KEY",
+    )
+    parser.add_argument("--model", type=str, required=True, help="Model id for answers (e.g. qwen3-max)")
+    parser.add_argument(
+        "--judge-model",
+        type=str,
+        default=None,
+        help="Model id for LLM judge + safety (default: same as --model). Set to qwen3-max when --model is another model",
+    )
     parser.add_argument("--concurrency", type=int, default=5, help="Concurrency (default: 5)")
     parser.add_argument("--output-dir", type=str, default="results", help="Output directory")
     parser.add_argument("--no-safety-review", action="store_true", help="Disable safety review")
@@ -741,9 +756,9 @@ def main():
 
     languages = ["zh", "en", "ru", "vi"] if args.language == "all" else [args.language]
 
-    api_key = args.api_key or os.getenv("OPENAI_API_KEY")
+    api_key = args.api_key or os.getenv("OPENAI_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
     if not api_key:
-        print("Error: API key required. Set --api-key or OPENAI_API_KEY env var.")
+        print("Error: API key required. Use --api-key or set OPENAI_API_KEY / DASHSCOPE_API_KEY.")
         sys.exit(1)
 
     judge_model = args.judge_model or args.model
