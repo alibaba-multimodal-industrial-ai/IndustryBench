@@ -1,85 +1,32 @@
----
-language:
-- zh
-- en
-- ru
-- vi
-license: mit
-task_categories:
-- question-answering
-- text-generation
-pretty_name: IndustryBench
----
+<div align="center">
 
-# IndustryBench: Probing the Industrial Knowledge Boundaries of LLMs
+# IndustryBench
 
-**IndustryBench** is a multi-lingual benchmark for evaluating the industrial domain knowledge of large language models. It comprises **2,049** expert-curated QA pairs spanning **12** industrial sectors, with human-reviewed translations in **Chinese, English, Russian, and Vietnamese**.
+**A Multi-lingual Benchmark for Probing the Industrial Knowledge Boundaries of LLMs**
+
+[📄 Paper](https://arxiv.org/abs/2605.10267) · [🤗 Dataset](https://huggingface.co/datasets/danielbai1703/IndustryBench)
+
+</div>
 
 ## Overview
 
-| Dimension | Details |
-|-----------|---------|
-| Total questions | 2,049 |
-| Languages | Chinese (zh), English (en), Russian (ru), Vietnamese (vi) |
-| Difficulty | Easy / Medium / Hard |
-| Industry sectors | 10 (Machinery & Hardware, Chemical & Coatings, Electronics & Sensors, Electrical & Power, Cross-Industry, Metallurgy & Mining, Energy & Storage, Security & Fire Safety, Packaging & Printing, Textile & Leather) |
-| Capability tags | 7 (Selection & Substitution 31.7%, Standards & Terminology 29.8%, Process Principles 25.7%, Safety & Compliance 5.7%, Quality & Metrology 4.5%, Fault Diagnosis 1.5%, Engineering Calculation 1.1%) |
-| Knowledge grounding | Each question is linked to a national/industry standard, product manual, or authoritative reference |
+IndustryBench is a benchmark for evaluating the industrial domain knowledge of large language models. It consists of **2,049** expert-curated QA pairs with human-reviewed translations across **four languages** (Chinese, English, Russian, Vietnamese).
 
-## Dataset Structure
+| | |
+|---|---|
+| Questions | 2,049 |
+| Languages | zh, en, ru, vi |
+| Industry categories | 10 |
+| Capability dimensions | 7 |
+| Difficulty | easy / medium / hard |
 
-Each row in the dataset contains the following fields:
+## Installation
 
-| Field | Description |
-|-------|-------------|
-| `id` | Unique question ID (1–2049) |
-| `question` | Chinese question |
-| `answer` | Chinese ground-truth answer |
-| `question_en` | English question |
-| `answer_en` | English ground-truth answer |
-| `question_ru` | Russian question |
-| `answer_ru` | Russian ground-truth answer |
-| `question_vi` | Vietnamese question |
-| `answer_vi` | Vietnamese ground-truth answer |
-| `difficulty` | Difficulty level: `easy`, `medium`, `hard` |
-| `_format` | Question format |
-| `industry_primary` | Primary industry classification |
-| `capability` | Capability tag |
-| `knowledge_text` | Reference text from the relevant standard, manual, or authoritative source |
-| `domain` | Broad domain label |
+```bash
+pip install huggingface_hub
+```
 
-## Industry Sectors
-
-The dataset covers 10 major industrial product verticals: Machinery & Hardware (23.3%), Chemical & Coatings (19.8%), Electronics & Sensors (16.2%), Electrical & Power (11.7%), Cross-Industry (9.3%), Metallurgy & Mining (5.9%), Energy & Storage (4.1%), Security & Fire Safety (3.7%), Packaging & Printing (3.7%), and Textile & Leather (2.4%). The distribution reflects the verified source pool rather than a deliberately balanced design.
-
-## Capability Dimensions
-
-Each item is annotated with one primary capability label across 7 dimensions:
-
-- **Selection & Substitution** (31.7%) — Equipment and material selection, cross-product substitution
-- **Standards & Terminology** (29.8%) — Knowledge of national/industry standards and technical terminology
-- **Process Principles** (25.7%) — Understanding of industrial processes and their parameters
-- **Safety & Compliance** (5.7%) — Safety regulations, risk control, compliance requirements
-- **Quality & Metrology** (4.5%) — Measurement, inspection, and quality assurance
-- **Fault Diagnosis** (1.5%) — Equipment fault identification and resolution
-- **Engineering Calculation** (1.1%) — Quantitative engineering computations
-
-The distribution follows the natural frequency of the verified source pool. Selection, standards, and process questions dominate because they are more prevalent in the source material. Fault Diagnosis (31 questions) and Engineering Calculation (22 questions) have limited support, so per-dimension findings on these two labels should be interpreted as diagnostic signals rather than precise rankings.
-
-## Evaluation Protocol
-
-IndustryBench uses an **LLM-as-Judge** evaluation pipeline with a 0–3 scoring rubric:
-
-| Score | Criterion |
-|-------|-----------|
-| 3 | Model answer is essentially consistent with the ground truth, with matching reasoning and logic |
-| 2 | Model answer is largely correct but differs in reasoning or justification |
-| 1 | Model answer is partially correct or has plausible reasoning but incorrect conclusion |
-| 0 | Model answer is entirely incorrect |
-
-Additionally, a **safety review** module checks whether the model response contains industrial safety violations (e.g., recommending non-compliant equipment, omitting critical safety steps, violating mandatory standard clauses). Responses flagged as safety violations receive a final score of 0 regardless of the judge score.
-
-## Quick Start
+## Usage
 
 ### Load the dataset
 
@@ -92,36 +39,87 @@ df = dataset["train"].to_pandas()
 
 ### Run evaluation
 
+The included `evaluate.py` script runs multi-lingual QA evaluation with LLM-as-Judge scoring (0–3) and safety review. It accepts any OpenAI-compatible API endpoint.
+
 ```bash
-# Chinese evaluation
-python evaluate.py --language zh --api-base https://api.openai.com/v1 --api-key $OPENAI_API_KEY --model gpt-4o
+# Evaluate on Chinese questions
+python evaluate.py \
+  --language zh \
+  --api-base https://api.openai.com/v1 \
+  --api-key $OPENAI_API_KEY \
+  --model qwen3-max
 
-# English evaluation
-python evaluate.py --language en --api-base https://api.openai.com/v1 --api-key $OPENAI_API_KEY --model gpt-4o
-
-# All four languages
-python evaluate.py --language all --api-base https://api.openai.com/v1 --api-key $OPENAI_API_KEY --model gpt-4o
+# Evaluate all four languages
+python evaluate.py \
+  --language all \
+  --api-base https://api.openai.com/v1 \
+  --api-key $OPENAI_API_KEY \
+  --model qwen3-max
 ```
 
-See `evaluate.py --help` for all options.
+Run `python evaluate.py --help` for all available options.
 
-## Evaluation Script
+### Evaluation protocol
 
-The included `evaluate.py` script provides:
+Each model response is scored by an LLM judge on a 0–3 scale:
 
-- Multi-language support (zh / en / ru / vi) with language-specific prompts
-- LLM-as-Judge scoring (0–3) with configurable judge model
-- Safety & compliance review using knowledge_text as authoritative reference
-- Checkpoint-based resume for large-scale evaluation
-- Per-model CSV output with detailed statistics
+| Score | Criterion |
+|-------|-----------|
+| 3 | Consistent with ground truth, matching reasoning and logic |
+| 2 | Largely correct but differs in reasoning |
+| 1 | Partially correct or plausible reasoning with wrong conclusion |
+| 0 | Entirely incorrect |
 
-## Data Quality
+A safety review module additionally checks for industrial safety violations (e.g., non-compliant equipment recommendations, missing safety procedures). Violations result in a final score of 0.
 
-All 2,049 questions are expert-curated with human-reviewed translations across all four languages. The `knowledge_text` field links each question to its authoritative reference source (national standard, industry standard, or product manual).
+## Dataset Structure
+
+Each row contains the following fields:
+
+| Field | Description |
+|-------|-------------|
+| `id` | Unique ID (1–2049) |
+| `question` / `answer` | Chinese QA pair |
+| `question_en` / `answer_en` | English QA pair |
+| `question_ru` / `answer_ru` | Russian QA pair |
+| `question_vi` / `answer_vi` | Vietnamese QA pair |
+| `difficulty` | easy / medium / hard |
+| `_format` | Question format |
+| `industry_primary` | Industry category |
+| `capability` | Capability dimension |
+| `knowledge_text` | Reference text from national/industry standard or product manual |
+| `domain` | Broad domain label |
+
+### Capability dimensions
+
+Each item receives one primary capability label:
+
+- **Selection & Substitution** (31.7%)
+- **Standards & Terminology** (29.8%)
+- **Process Principles** (25.7%)
+- **Safety & Compliance** (5.7%)
+- **Quality & Metrology** (4.5%)
+- **Fault Diagnosis** (1.5%)
+- **Engineering Calculation** (1.1%)
+
+### Industry categories
+
+Ten major industrial product verticals:
+
+- Machinery & Hardware (23.3%)
+- Chemical & Coatings (19.8%)
+- Electronics & Sensors (16.2%)
+- Electrical & Power (11.7%)
+- Cross-Industry (9.3%)
+- Metallurgy & Mining (5.9%)
+- Energy & Storage (4.1%)
+- Security & Fire Safety (3.7%)
+- Packaging & Printing (3.7%)
+- Textile & Leather (2.4%)
+
+The distributions reflect the natural frequency of the verified source pool rather than a deliberately balanced design.
 
 ## Citation
-
-If you use this dataset in your work, please cite:
 
 ```bibtex
 @misc{bai2026industrybenchprobingindustrialknowledge,
