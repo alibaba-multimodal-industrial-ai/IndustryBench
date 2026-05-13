@@ -1,4 +1,6 @@
-# IndustryBench
+# IndustryBench: Probing the Industrial Knowledge Boundaries of LLMs
+
+[📝Paper](https://arxiv.org/abs/2605.10267) | [🤗HuggingFace Data](https://huggingface.co/datasets/alibaba-multimodal-industrial-ai/IndustryBench)  
 
 **Source-grounded industrial procurement QA** for LLMs: each item is tied to a **Chinese national standard (GB/T)** or a **structured industrial product record**, with **human-reviewed** English, Russian, and Vietnamese renderings **aligned to the same item ids** as the Chinese source.
 
