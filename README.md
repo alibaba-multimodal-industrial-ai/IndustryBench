@@ -105,5 +105,3 @@ Large raw CSVs are **not** stored in git; the canonical release is **Hugging Fac
   url={https://arxiv.org/abs/2605.10267},
 }
 ```
-
-Field-level schema and construction details: **Hugging Face dataset card** + **paper appendix**.
